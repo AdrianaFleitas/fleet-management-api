@@ -35,7 +35,7 @@ public class VehicleController {
 
         return new ApiResponse<>(
                 true,
-                "Vehicles retrieved successfully from memory",
+                "Vehicles retrieved successfully",
                 vehicles
         );
     }

@@ -2,20 +2,23 @@ package com.adriana.fleet.service;
 
 import com.adriana.fleet.dto.VehicleRequest;
 import com.adriana.fleet.dto.VehicleResponse;
+import com.adriana.fleet.entity.Vehicle;
+import com.adriana.fleet.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class VehicleService {
 
-    private final List<VehicleResponse> vehicles = new ArrayList<>();
-    private Long nextId = 1L;
+    private final VehicleRepository vehicleRepository;
+
+    public VehicleService(VehicleRepository vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
+    }
 
     public VehicleResponse createVehicle(VehicleRequest request) {
-        VehicleResponse vehicle = new VehicleResponse(
-                nextId,
+        Vehicle vehicle = new Vehicle(
                 request.getPlateNumber(),
                 request.getBrand(),
                 request.getModel(),
@@ -23,45 +26,57 @@ public class VehicleService {
                 request.getStatus()
         );
 
-        vehicles.add(vehicle);
-        nextId++;
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
-        return vehicle;
+        return mapToResponse(savedVehicle);
     }
 
     public List<VehicleResponse> getAllVehicles() {
-        return vehicles;
+        return vehicleRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     public VehicleResponse getVehicleById(Long id) {
-        return vehicles.stream()
-                .filter(vehicle -> vehicle.getId().equals(id))
-                .findFirst()
+        return vehicleRepository.findById(id)
+                .map(this::mapToResponse)
                 .orElse(null);
     }
+
     public VehicleResponse updateVehicle(Long id, VehicleRequest request) {
-        for (int i = 0; i < vehicles.size(); i++) {
-            VehicleResponse currentVehicle = vehicles.get(i);
+        return vehicleRepository.findById(id)
+                .map(vehicle -> {
+                    vehicle.setPlateNumber(request.getPlateNumber());
+                    vehicle.setBrand(request.getBrand());
+                    vehicle.setModel(request.getModel());
+                    vehicle.setYear(request.getYear());
+                    vehicle.setStatus(request.getStatus());
 
-            if (currentVehicle.getId().equals(id)) {
-                VehicleResponse updatedVehicle = new VehicleResponse(
-                        id,
-                        request.getPlateNumber(),
-                        request.getBrand(),
-                        request.getModel(),
-                        request.getYear(),
-                        request.getStatus()
-                );
+                    Vehicle updatedVehicle = vehicleRepository.save(vehicle);
 
-                vehicles.set(i, updatedVehicle);
+                    return mapToResponse(updatedVehicle);
+                })
+                .orElse(null);
+    }
 
-                return updatedVehicle;
-            }
+    public boolean deleteVehicle(Long id) {
+        if (!vehicleRepository.existsById(id)) {
+            return false;
         }
 
-        return null;
+        vehicleRepository.deleteById(id);
+        return true;
     }
-    public boolean deleteVehicle(Long id) {
-        return vehicles.removeIf(vehicle -> vehicle.getId().equals(id));
+
+    private VehicleResponse mapToResponse(Vehicle vehicle) {
+        return new VehicleResponse(
+                vehicle.getId(),
+                vehicle.getPlateNumber(),
+                vehicle.getBrand(),
+                vehicle.getModel(),
+                vehicle.getYear(),
+                vehicle.getStatus()
+        );
     }
 }
