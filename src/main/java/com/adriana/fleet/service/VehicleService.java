@@ -5,6 +5,8 @@ import com.adriana.fleet.dto.VehicleResponse;
 import com.adriana.fleet.entity.Vehicle;
 import com.adriana.fleet.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
+import com.adriana.fleet.exception.DuplicateResourceException;
+import com.adriana.fleet.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -18,6 +20,9 @@ public class VehicleService {
     }
 
     public VehicleResponse createVehicle(VehicleRequest request) {
+        if (vehicleRepository.existsByPlateNumber(request.getPlateNumber())) {
+            throw new DuplicateResourceException("Plate number already exists");
+        }
         Vehicle vehicle = new Vehicle(
                 request.getPlateNumber(),
                 request.getBrand(),
@@ -39,34 +44,33 @@ public class VehicleService {
     }
 
     public VehicleResponse getVehicleById(Long id) {
-        return vehicleRepository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+
+        return mapToResponse(vehicle);
     }
 
     public VehicleResponse updateVehicle(Long id, VehicleRequest request) {
-        return vehicleRepository.findById(id)
-                .map(vehicle -> {
-                    vehicle.setPlateNumber(request.getPlateNumber());
-                    vehicle.setBrand(request.getBrand());
-                    vehicle.setModel(request.getModel());
-                    vehicle.setYear(request.getYear());
-                    vehicle.setStatus(request.getStatus());
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
 
-                    Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+        vehicle.setPlateNumber(request.getPlateNumber());
+        vehicle.setBrand(request.getBrand());
+        vehicle.setModel(request.getModel());
+        vehicle.setYear(request.getYear());
+        vehicle.setStatus(request.getStatus());
 
-                    return mapToResponse(updatedVehicle);
-                })
-                .orElse(null);
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+
+        return mapToResponse(updatedVehicle);
     }
 
-    public boolean deleteVehicle(Long id) {
+    public void deleteVehicle(Long id) {
         if (!vehicleRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException("Vehicle not found");
         }
 
         vehicleRepository.deleteById(id);
-        return true;
     }
 
     private VehicleResponse mapToResponse(Vehicle vehicle) {

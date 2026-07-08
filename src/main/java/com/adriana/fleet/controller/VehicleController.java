@@ -4,6 +4,7 @@ import com.adriana.fleet.dto.ApiResponse;
 import com.adriana.fleet.dto.VehicleRequest;
 import com.adriana.fleet.dto.VehicleResponse;
 import com.adriana.fleet.service.VehicleService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ApiResponse<VehicleResponse> createVehicle(@RequestBody VehicleRequest request) {
+    public ApiResponse<VehicleResponse> createVehicle(@Valid @RequestBody VehicleRequest request) {
         VehicleResponse vehicle = vehicleService.createVehicle(request);
 
         return new ApiResponse<>(
@@ -39,17 +40,10 @@ public class VehicleController {
                 vehicles
         );
     }
+
     @GetMapping("/{id}")
     public ApiResponse<VehicleResponse> getVehicleById(@PathVariable Long id) {
         VehicleResponse vehicle = vehicleService.getVehicleById(id);
-
-        if (vehicle == null) {
-            return new ApiResponse<>(
-                    false,
-                    "Vehicle not found",
-                    null
-            );
-        }
 
         return new ApiResponse<>(
                 true,
@@ -57,20 +51,13 @@ public class VehicleController {
                 vehicle
         );
     }
+
     @PutMapping("/{id}")
     public ApiResponse<VehicleResponse> updateVehicle(
             @PathVariable Long id,
-            @RequestBody VehicleRequest request
+            @Valid @RequestBody VehicleRequest request
     ) {
         VehicleResponse vehicle = vehicleService.updateVehicle(id, request);
-
-        if (vehicle == null) {
-            return new ApiResponse<>(
-                    false,
-                    "Vehicle not found",
-                    null
-            );
-        }
 
         return new ApiResponse<>(
                 true,
@@ -78,17 +65,10 @@ public class VehicleController {
                 vehicle
         );
     }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteVehicle(@PathVariable Long id) {
-        boolean deleted = vehicleService.deleteVehicle(id);
-
-        if (!deleted) {
-            return new ApiResponse<>(
-                    false,
-                    "Vehicle not found",
-                    null
-            );
-        }
+        vehicleService.deleteVehicle(id);
 
         return new ApiResponse<>(
                 true,
