@@ -41,6 +41,17 @@ public class VehicleController {
         );
     }
 
+    @GetMapping("/deleted")
+    public ApiResponse<List<VehicleResponse>> getDeletedVehicles() {
+        List<VehicleResponse> vehicles = vehicleService.getDeletedVehicles();
+
+        return new ApiResponse<>(
+                true,
+                "Deleted vehicles retrieved successfully",
+                vehicles
+        );
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<VehicleResponse> getVehicleById(@PathVariable Long id) {
         VehicleResponse vehicle = vehicleService.getVehicleById(id);
@@ -74,6 +85,17 @@ public class VehicleController {
                 true,
                 "Vehicle deleted successfully",
                 null
+        );
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ApiResponse<VehicleResponse> restoreVehicle(@PathVariable Long id) {
+        VehicleResponse vehicle = vehicleService.restoreVehicle(id);
+
+        return new ApiResponse<>(
+                true,
+                "Vehicle restored successfully",
+                vehicle
         );
     }
 }
