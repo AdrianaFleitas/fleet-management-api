@@ -33,8 +33,16 @@ public class VehicleAssignmentController {
     }
 
     @GetMapping
-    public ApiResponse<List<VehicleAssignmentResponse>> getAllAssignments() {
-        List<VehicleAssignmentResponse> assignments = vehicleAssignmentService.getAllAssignments();
+    public ApiResponse<List<VehicleAssignmentResponse>> getAllAssignments(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long vehicleId,
+            @RequestParam(required = false) Long driverId
+    ) {
+        List<VehicleAssignmentResponse> assignments = vehicleAssignmentService.getAssignmentsFiltered(
+                status,
+                vehicleId,
+                driverId
+        );
 
         return new ApiResponse<>(
                 true,

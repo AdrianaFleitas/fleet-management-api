@@ -17,4 +17,14 @@ public interface VehicleAssignmentRepository extends JpaRepository<VehicleAssign
     boolean existsByVehicleIdAndStatusAndDeletedAtIsNull(Long vehicleId, String status);
 
     boolean existsByDriverIdAndStatusAndDeletedAtIsNull(Long driverId, String status);
+
+    List<VehicleAssignment> findAllByStatusAndDeletedAtIsNull(String status);
+
+    List<VehicleAssignment> findAllByVehicleIdAndDeletedAtIsNull(Long vehicleId);
+
+    List<VehicleAssignment> findAllByDriverIdAndDeletedAtIsNull(Long driverId);
+
+    List<VehicleAssignment> findAllByVehicleIdAndStatusAndDeletedAtIsNull(Long vehicleId, String status);
+
+    List<VehicleAssignment> findAllByDriverIdAndStatusAndDeletedAtIsNull(Long driverId, String status);
 }
