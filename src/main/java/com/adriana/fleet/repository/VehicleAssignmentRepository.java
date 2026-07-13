@@ -1,6 +1,8 @@
 package com.adriana.fleet.repository;
 
 import com.adriana.fleet.entity.VehicleAssignment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -27,4 +29,24 @@ public interface VehicleAssignmentRepository extends JpaRepository<VehicleAssign
     List<VehicleAssignment> findAllByVehicleIdAndStatusAndDeletedAtIsNull(Long vehicleId, String status);
 
     List<VehicleAssignment> findAllByDriverIdAndStatusAndDeletedAtIsNull(Long driverId, String status);
+
+    Page<VehicleAssignment> findAllByDeletedAtIsNull(Pageable pageable);
+
+    Page<VehicleAssignment> findAllByStatusAndDeletedAtIsNull(String status, Pageable pageable);
+
+    Page<VehicleAssignment> findAllByVehicleIdAndDeletedAtIsNull(Long vehicleId, Pageable pageable);
+
+    Page<VehicleAssignment> findAllByDriverIdAndDeletedAtIsNull(Long driverId, Pageable pageable);
+
+    Page<VehicleAssignment> findAllByVehicleIdAndStatusAndDeletedAtIsNull(
+            Long vehicleId,
+            String status,
+            Pageable pageable
+    );
+
+    Page<VehicleAssignment> findAllByDriverIdAndStatusAndDeletedAtIsNull(
+            Long driverId,
+            String status,
+            Pageable pageable
+    );
 }

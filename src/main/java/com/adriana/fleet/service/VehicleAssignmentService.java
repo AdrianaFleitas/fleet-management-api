@@ -11,7 +11,11 @@ import com.adriana.fleet.repository.DriverRepository;
 import com.adriana.fleet.repository.VehicleAssignmentRepository;
 import com.adriana.fleet.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
-
+import com.adriana.fleet.dto.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -105,6 +109,70 @@ public class VehicleAssignmentService {
         return assignments.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+    public PagedResponse<VehicleAssignmentResponse> getAssignmentsFilteredPaged(
+            String status,
+            Long vehicleId,
+            Long driverId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<VehicleAssignment> assignmentPage;
+
+        if (status != null && vehicleId != null) {
+            assignmentPage = vehicleAssignmentRepository.findAllByVehicleIdAndStatusAndDeletedAtIsNull(
+                    vehicleId,
+                    status,
+                    pageable
+            );
+        } else if (status != null && driverId != null) {
+            assignmentPage = vehicleAssignmentRepository.findAllByDriverIdAndStatusAndDeletedAtIsNull(
+                    driverId,
+                    status,
+                    pageable
+            );
+        } else if (vehicleId != null) {
+            assignmentPage = vehicleAssignmentRepository.findAllByVehicleIdAndDeletedAtIsNull(
+                    vehicleId,
+                    pageable
+            );
+        } else if (driverId != null) {
+            assignmentPage = vehicleAssignmentRepository.findAllByDriverIdAndDeletedAtIsNull(
+                    driverId,
+                    pageable
+            );
+        } else if (status != null) {
+            assignmentPage = vehicleAssignmentRepository.findAllByStatusAndDeletedAtIsNull(
+                    status,
+                    pageable
+            );
+        } else {
+            assignmentPage = vehicleAssignmentRepository.findAllByDeletedAtIsNull(pageable);
+        }
+
+        List<VehicleAssignmentResponse> content = assignmentPage.getContent()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                assignmentPage.getNumber(),
+                assignmentPage.getSize(),
+                assignmentPage.getTotalElements(),
+                assignmentPage.getTotalPages(),
+                assignmentPage.isFirst(),
+                assignmentPage.isLast()
+        );
     }
 
     public List<VehicleAssignmentResponse> getDeletedAssignments() {

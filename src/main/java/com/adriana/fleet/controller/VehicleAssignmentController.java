@@ -6,7 +6,7 @@ import com.adriana.fleet.dto.VehicleAssignmentResponse;
 import com.adriana.fleet.service.VehicleAssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
+import com.adriana.fleet.dto.PagedResponse;
 import java.util.List;
 
 @RestController
@@ -33,15 +33,23 @@ public class VehicleAssignmentController {
     }
 
     @GetMapping
-    public ApiResponse<List<VehicleAssignmentResponse>> getAllAssignments(
+    public ApiResponse<PagedResponse<VehicleAssignmentResponse>> getAllAssignments(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long vehicleId,
-            @RequestParam(required = false) Long driverId
+            @RequestParam(required = false) Long driverId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "assignedAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection
     ) {
-        List<VehicleAssignmentResponse> assignments = vehicleAssignmentService.getAssignmentsFiltered(
+        PagedResponse<VehicleAssignmentResponse> assignments = vehicleAssignmentService.getAssignmentsFilteredPaged(
                 status,
                 vehicleId,
-                driverId
+                driverId,
+                page,
+                size,
+                sortBy,
+                sortDirection
         );
 
         return new ApiResponse<>(
