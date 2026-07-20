@@ -1,29 +1,47 @@
 package com.adriana.fleet.service;
 
+import com.adriana.fleet.dto.PagedResponse;
 import com.adriana.fleet.dto.VehicleAssignmentRequest;
 import com.adriana.fleet.dto.VehicleAssignmentResponse;
 import com.adriana.fleet.entity.Driver;
 import com.adriana.fleet.entity.Vehicle;
 import com.adriana.fleet.entity.VehicleAssignment;
+import com.adriana.fleet.exception.BadRequestException;
 import com.adriana.fleet.exception.DuplicateResourceException;
 import com.adriana.fleet.exception.ResourceNotFoundException;
 import com.adriana.fleet.repository.DriverRepository;
 import com.adriana.fleet.repository.VehicleAssignmentRepository;
 import com.adriana.fleet.repository.VehicleRepository;
-import org.springframework.stereotype.Service;
-import com.adriana.fleet.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class VehicleAssignmentService {
 
     private static final String STATUS_ACTIVE = "ACTIVE";
     private static final String STATUS_RELEASED = "RELEASED";
+    private static final int MAX_PAGE_SIZE = 100;
+
+    private static final Set<String> VALID_STATUSES = Set.of(
+            STATUS_ACTIVE,
+            STATUS_RELEASED
+    );
+
+    private static final Set<String> VALID_SORT_FIELDS = Set.of(
+            "id",
+            "assignedAt",
+            "releasedAt",
+            "status",
+            "createdAt",
+            "updatedAt"
+    );
 
     private final VehicleAssignmentRepository vehicleAssignmentRepository;
     private final VehicleRepository vehicleRepository;
@@ -110,6 +128,7 @@ public class VehicleAssignmentService {
                 .map(this::mapToResponse)
                 .toList();
     }
+
     public PagedResponse<VehicleAssignmentResponse> getAssignmentsFilteredPaged(
             String status,
             Long vehicleId,
@@ -119,6 +138,8 @@ public class VehicleAssignmentService {
             String sortBy,
             String sortDirection
     ) {
+        validatePaginationAndFilters(status, page, size, sortBy, sortDirection);
+
         Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
                 ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
@@ -227,6 +248,38 @@ public class VehicleAssignmentService {
         VehicleAssignment restoredAssignment = vehicleAssignmentRepository.save(assignment);
 
         return mapToResponse(restoredAssignment);
+    }
+
+    private void validatePaginationAndFilters(
+            String status,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+        if (page < 0) {
+            throw new BadRequestException("Page must be greater than or equal to 0");
+        }
+
+        if (size < 1) {
+            throw new BadRequestException("Size must be greater than or equal to 1");
+        }
+
+        if (size > MAX_PAGE_SIZE) {
+            throw new BadRequestException("Size must be less than or equal to " + MAX_PAGE_SIZE);
+        }
+
+        if (status != null && !VALID_STATUSES.contains(status)) {
+            throw new BadRequestException("Status must be ACTIVE or RELEASED");
+        }
+
+        if (!VALID_SORT_FIELDS.contains(sortBy)) {
+            throw new BadRequestException("Invalid sort field");
+        }
+
+        if (!"asc".equalsIgnoreCase(sortDirection) && !"desc".equalsIgnoreCase(sortDirection)) {
+            throw new BadRequestException("Sort direction must be asc or desc");
+        }
     }
 
     private VehicleAssignmentResponse mapToResponse(VehicleAssignment assignment) {

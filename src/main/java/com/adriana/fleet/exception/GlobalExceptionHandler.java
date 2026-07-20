@@ -54,4 +54,13 @@ public class GlobalExceptionHandler {
                 null
         );
     }
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleBadRequestException(BadRequestException ex) {
+        return new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null
+        );
+    }
 }
