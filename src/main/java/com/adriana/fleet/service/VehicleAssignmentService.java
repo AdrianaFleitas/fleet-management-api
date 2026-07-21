@@ -17,7 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
+import com.adriana.fleet.constants.AssignmentStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -25,13 +25,12 @@ import java.util.Set;
 @Service
 public class VehicleAssignmentService {
 
-    private static final String STATUS_ACTIVE = "ACTIVE";
-    private static final String STATUS_RELEASED = "RELEASED";
+
     private static final int MAX_PAGE_SIZE = 100;
 
     private static final Set<String> VALID_STATUSES = Set.of(
-            STATUS_ACTIVE,
-            STATUS_RELEASED
+            AssignmentStatus.ACTIVE,
+            AssignmentStatus.RELEASED
     );
 
     private static final Set<String> VALID_SORT_FIELDS = Set.of(
@@ -66,14 +65,14 @@ public class VehicleAssignmentService {
 
         if (vehicleAssignmentRepository.existsByVehicleIdAndStatusAndDeletedAtIsNull(
                 request.getVehicleId(),
-                STATUS_ACTIVE
+                AssignmentStatus.ACTIVE
         )) {
             throw new DuplicateResourceException("Vehicle already has an active assignment");
         }
 
         if (vehicleAssignmentRepository.existsByDriverIdAndStatusAndDeletedAtIsNull(
                 request.getDriverId(),
-                STATUS_ACTIVE
+                AssignmentStatus.ACTIVE
         )) {
             throw new DuplicateResourceException("Driver already has an active assignment");
         }
@@ -82,7 +81,7 @@ public class VehicleAssignmentService {
                 vehicle,
                 driver,
                 LocalDateTime.now(),
-                STATUS_ACTIVE
+                AssignmentStatus.ACTIVE
         );
 
         VehicleAssignment savedAssignment = vehicleAssignmentRepository.save(assignment);
@@ -214,11 +213,11 @@ public class VehicleAssignmentService {
         VehicleAssignment assignment = vehicleAssignmentRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle assignment not found"));
 
-        if (!STATUS_ACTIVE.equals(assignment.getStatus())) {
+        if (!AssignmentStatus.ACTIVE.equals(assignment.getStatus())) {
             throw new DuplicateResourceException("Vehicle assignment is not active");
         }
 
-        assignment.setStatus(STATUS_RELEASED);
+        assignment.setStatus(AssignmentStatus.RELEASED);
         assignment.setReleasedAt(LocalDateTime.now());
 
         VehicleAssignment releasedAssignment = vehicleAssignmentRepository.save(assignment);
