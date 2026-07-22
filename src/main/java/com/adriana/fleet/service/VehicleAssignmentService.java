@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import com.adriana.fleet.constants.VehicleAssignmentSortField;
 import java.util.List;
 import java.util.Set;
-
+import com.adriana.fleet.constants.ErrorMessage;
 @Service
 public class VehicleAssignmentService {
 
@@ -59,23 +59,23 @@ public class VehicleAssignmentService {
 
     public VehicleAssignmentResponse createAssignment(VehicleAssignmentRequest request) {
         Vehicle vehicle = vehicleRepository.findByIdAndDeletedAtIsNull(request.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.VEHICLE_NOT_FOUND));
 
         Driver driver = driverRepository.findByIdAndDeletedAtIsNull(request.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
 
         if (vehicleAssignmentRepository.existsByVehicleIdAndStatusAndDeletedAtIsNull(
                 request.getVehicleId(),
                 AssignmentStatus.ACTIVE
         )) {
-            throw new DuplicateResourceException("Vehicle already has an active assignment");
+            throw new DuplicateResourceException(ErrorMessage.VEHICLE_ALREADY_HAS_ACTIVE_ASSIGNMENT);
         }
 
         if (vehicleAssignmentRepository.existsByDriverIdAndStatusAndDeletedAtIsNull(
                 request.getDriverId(),
                 AssignmentStatus.ACTIVE
         )) {
-            throw new DuplicateResourceException("Driver already has an active assignment");
+            throw new DuplicateResourceException(ErrorMessage.DRIVER_ALREADY_HAS_ACTIVE_ASSIGNMENT);
         }
 
         VehicleAssignment assignment = new VehicleAssignment(
@@ -205,17 +205,17 @@ public class VehicleAssignmentService {
 
     public VehicleAssignmentResponse getAssignmentById(Long id) {
         VehicleAssignment assignment = vehicleAssignmentRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle assignment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.VEHICLE_ASSIGNMENT_NOT_FOUND));
 
         return mapToResponse(assignment);
     }
 
     public VehicleAssignmentResponse releaseAssignment(Long id) {
         VehicleAssignment assignment = vehicleAssignmentRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle assignment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.VEHICLE_ASSIGNMENT_NOT_FOUND));
 
         if (!AssignmentStatus.ACTIVE.equals(assignment.getStatus())) {
-            throw new DuplicateResourceException("Vehicle assignment is not active");
+            throw new DuplicateResourceException(ErrorMessage.VEHICLE_ASSIGNMENT_IS_NOT_ACTIVE);
         }
 
         assignment.setStatus(AssignmentStatus.RELEASED);
@@ -228,7 +228,7 @@ public class VehicleAssignmentService {
 
     public void deleteAssignment(Long id) {
         VehicleAssignment assignment = vehicleAssignmentRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle assignment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.VEHICLE_ASSIGNMENT_NOT_FOUND));
 
         assignment.setDeletedAt(LocalDateTime.now());
 
@@ -237,10 +237,10 @@ public class VehicleAssignmentService {
 
     public VehicleAssignmentResponse restoreAssignment(Long id) {
         VehicleAssignment assignment = vehicleAssignmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle assignment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.VEHICLE_ASSIGNMENT_NOT_FOUND));
 
         if (assignment.getDeletedAt() == null) {
-            throw new DuplicateResourceException("Vehicle assignment is not deleted");
+            throw new DuplicateResourceException(ErrorMessage.VEHICLE_ASSIGNMENT_IS_NOT_DELETED);
         }
 
         assignment.setDeletedAt(null);
@@ -258,27 +258,27 @@ public class VehicleAssignmentService {
             String sortDirection
     ) {
         if (page < 0) {
-            throw new BadRequestException("Page must be greater than or equal to 0");
+            throw new BadRequestException(ErrorMessage.PAGE_MUST_BE_GREATER_THAN_OR_EQUAL_TO_ZERO);
         }
 
         if (size < 1) {
-            throw new BadRequestException("Size must be greater than or equal to 1");
+            throw new BadRequestException(ErrorMessage.SIZE_MUST_BE_GREATER_THAN_OR_EQUAL_TO_ONE);
         }
 
         if (size > MAX_PAGE_SIZE) {
-            throw new BadRequestException("Size must be less than or equal to " + MAX_PAGE_SIZE);
+            throw new BadRequestException(ErrorMessage.SIZE_MUST_BE_LESS_THAN_OR_EQUAL_TO + MAX_PAGE_SIZE);
         }
 
         if (status != null && !VALID_STATUSES.contains(status)) {
-            throw new BadRequestException("Status must be ACTIVE or RELEASED");
+            throw new BadRequestException(ErrorMessage.STATUS_MUST_BE_ACTIVE_OR_RELEASED);
         }
 
         if (!VALID_SORT_FIELDS.contains(sortBy)) {
-            throw new BadRequestException("Invalid sort field");
+            throw new BadRequestException(ErrorMessage.INVALID_SORT_FIELD);
         }
 
         if (!"asc".equalsIgnoreCase(sortDirection) && !"desc".equalsIgnoreCase(sortDirection)) {
-            throw new BadRequestException("Sort direction must be asc or desc");
+            throw new BadRequestException(ErrorMessage.SORT_DIRECTION_MUST_BE_ASC_OR_DESC);
         }
     }
 
