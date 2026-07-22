@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.adriana.fleet.constants.AssignmentStatus;
 import java.time.LocalDateTime;
+import com.adriana.fleet.constants.VehicleAssignmentSortField;
 import java.util.List;
 import java.util.Set;
 
@@ -34,12 +35,12 @@ public class VehicleAssignmentService {
     );
 
     private static final Set<String> VALID_SORT_FIELDS = Set.of(
-            "id",
-            "assignedAt",
-            "releasedAt",
-            "status",
-            "createdAt",
-            "updatedAt"
+            VehicleAssignmentSortField.ID,
+            VehicleAssignmentSortField.ASSIGNED_AT,
+            VehicleAssignmentSortField.RELEASED_AT,
+            VehicleAssignmentSortField.STATUS,
+            VehicleAssignmentSortField.CREATED_AT,
+            VehicleAssignmentSortField.UPDATED_AT
     );
 
     private final VehicleAssignmentRepository vehicleAssignmentRepository;
