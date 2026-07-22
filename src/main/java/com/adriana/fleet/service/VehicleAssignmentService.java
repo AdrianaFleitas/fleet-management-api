@@ -23,11 +23,10 @@ import com.adriana.fleet.constants.VehicleAssignmentSortField;
 import java.util.List;
 import java.util.Set;
 import com.adriana.fleet.constants.ErrorMessage;
+import com.adriana.fleet.constants.PaginationDefaults;
 @Service
 public class VehicleAssignmentService {
 
-
-    private static final int MAX_PAGE_SIZE = 100;
 
     private static final Set<String> VALID_STATUSES = Set.of(
             AssignmentStatus.ACTIVE,
@@ -200,8 +199,10 @@ public class VehicleAssignmentService {
             throw new BadRequestException(ErrorMessage.SIZE_MUST_BE_GREATER_THAN_OR_EQUAL_TO_ONE);
         }
 
-        if (size > MAX_PAGE_SIZE) {
-            throw new BadRequestException(ErrorMessage.SIZE_MUST_BE_LESS_THAN_OR_EQUAL_TO + MAX_PAGE_SIZE);
+        if (size > PaginationDefaults.MAX_PAGE_SIZE) {
+            throw new BadRequestException(
+                    ErrorMessage.SIZE_MUST_BE_LESS_THAN_OR_EQUAL_TO + PaginationDefaults.MAX_PAGE_SIZE
+            );
         }
 
         if (status != null && !VALID_STATUSES.contains(status)) {

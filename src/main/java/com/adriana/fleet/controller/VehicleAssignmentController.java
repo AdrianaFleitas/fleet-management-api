@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.adriana.fleet.dto.PagedResponse;
 import java.util.List;
+import com.adriana.fleet.constants.PaginationDefaults;
 import com.adriana.fleet.constants.VehicleAssignmentSortField;
 @RestController
 @RequestMapping("/api/v1/vehicle-assignments")
@@ -37,10 +38,10 @@ public class VehicleAssignmentController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long vehicleId,
             @RequestParam(required = false) Long driverId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = PaginationDefaults.DEFAULT_PAGE) int page,
+            @RequestParam(defaultValue = PaginationDefaults.DEFAULT_SIZE) int size,
             @RequestParam(defaultValue = VehicleAssignmentSortField.ASSIGNED_AT) String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection
+            @RequestParam(defaultValue = PaginationDefaults.DEFAULT_SORT_DIRECTION) String sortDirection
     ) {
         PagedResponse<VehicleAssignmentResponse> assignments = vehicleAssignmentService.getAssignmentsFilteredPaged(
                 status,
