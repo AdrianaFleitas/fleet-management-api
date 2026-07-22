@@ -90,45 +90,6 @@ public class VehicleAssignmentService {
         return mapToResponse(savedAssignment);
     }
 
-    public List<VehicleAssignmentResponse> getAllAssignments() {
-        return vehicleAssignmentRepository.findAllByDeletedAtIsNull()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    public List<VehicleAssignmentResponse> getAssignmentsFiltered(
-            String status,
-            Long vehicleId,
-            Long driverId
-    ) {
-        List<VehicleAssignment> assignments;
-
-        if (status != null && vehicleId != null) {
-            assignments = vehicleAssignmentRepository.findAllByVehicleIdAndStatusAndDeletedAtIsNull(
-                    vehicleId,
-                    status
-            );
-        } else if (status != null && driverId != null) {
-            assignments = vehicleAssignmentRepository.findAllByDriverIdAndStatusAndDeletedAtIsNull(
-                    driverId,
-                    status
-            );
-        } else if (vehicleId != null) {
-            assignments = vehicleAssignmentRepository.findAllByVehicleIdAndDeletedAtIsNull(vehicleId);
-        } else if (driverId != null) {
-            assignments = vehicleAssignmentRepository.findAllByDriverIdAndDeletedAtIsNull(driverId);
-        } else if (status != null) {
-            assignments = vehicleAssignmentRepository.findAllByStatusAndDeletedAtIsNull(status);
-        } else {
-            assignments = vehicleAssignmentRepository.findAllByDeletedAtIsNull();
-        }
-
-        return assignments.stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-
     public PagedResponse<VehicleAssignmentResponse> getAssignmentsFilteredPaged(
             String status,
             Long vehicleId,
