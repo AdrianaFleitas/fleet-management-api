@@ -4,7 +4,8 @@ import com.adriana.fleet.entity.VehicleAssignment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,20 @@ public interface VehicleAssignmentRepository extends JpaRepository<VehicleAssign
     Page<VehicleAssignment> findAllByDriverIdAndStatusAndDeletedAtIsNull(
             Long driverId,
             String status,
+            Pageable pageable
+    );
+    @Query("""
+        SELECT assignment
+        FROM VehicleAssignment assignment
+        WHERE assignment.deletedAt IS NULL
+        AND (:status IS NULL OR assignment.status = :status)
+        AND (:vehicleId IS NULL OR assignment.vehicle.id = :vehicleId)
+        AND (:driverId IS NULL OR assignment.driver.id = :driverId)
+        """)
+    Page<VehicleAssignment> findFilteredAssignments(
+            @Param("status") String status,
+            @Param("vehicleId") Long vehicleId,
+            @Param("driverId") Long driverId,
             Pageable pageable
     );
 }

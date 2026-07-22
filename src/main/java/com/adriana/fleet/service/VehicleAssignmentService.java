@@ -147,38 +147,12 @@ public class VehicleAssignmentService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<VehicleAssignment> assignmentPage;
-
-        if (status != null && vehicleId != null) {
-            assignmentPage = vehicleAssignmentRepository.findAllByVehicleIdAndStatusAndDeletedAtIsNull(
-                    vehicleId,
-                    status,
-                    pageable
-            );
-        } else if (status != null && driverId != null) {
-            assignmentPage = vehicleAssignmentRepository.findAllByDriverIdAndStatusAndDeletedAtIsNull(
-                    driverId,
-                    status,
-                    pageable
-            );
-        } else if (vehicleId != null) {
-            assignmentPage = vehicleAssignmentRepository.findAllByVehicleIdAndDeletedAtIsNull(
-                    vehicleId,
-                    pageable
-            );
-        } else if (driverId != null) {
-            assignmentPage = vehicleAssignmentRepository.findAllByDriverIdAndDeletedAtIsNull(
-                    driverId,
-                    pageable
-            );
-        } else if (status != null) {
-            assignmentPage = vehicleAssignmentRepository.findAllByStatusAndDeletedAtIsNull(
-                    status,
-                    pageable
-            );
-        } else {
-            assignmentPage = vehicleAssignmentRepository.findAllByDeletedAtIsNull(pageable);
-        }
+        Page<VehicleAssignment> assignmentPage = vehicleAssignmentRepository.findFilteredAssignments(
+                status,
+                vehicleId,
+                driverId,
+                pageable
+        );
 
         List<VehicleAssignmentResponse> content = assignmentPage.getContent()
                 .stream()
