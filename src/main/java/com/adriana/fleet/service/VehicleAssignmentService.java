@@ -1,5 +1,5 @@
 package com.adriana.fleet.service;
-
+import com.adriana.fleet.constants.SortDirection;
 import com.adriana.fleet.dto.PagedResponse;
 import com.adriana.fleet.dto.VehicleAssignmentRequest;
 import com.adriana.fleet.dto.VehicleAssignmentResponse;
@@ -100,7 +100,7 @@ public class VehicleAssignmentService {
     ) {
         validatePaginationAndFilters(status, page, size, sortBy, sortDirection);
 
-        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+        Sort.Direction direction = SortDirection.DESC.equalsIgnoreCase(sortDirection)
                 ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
 
@@ -213,7 +213,8 @@ public class VehicleAssignmentService {
             throw new BadRequestException(ErrorMessage.INVALID_SORT_FIELD);
         }
 
-        if (!"asc".equalsIgnoreCase(sortDirection) && !"desc".equalsIgnoreCase(sortDirection)) {
+        if (!SortDirection.ASC.equalsIgnoreCase(sortDirection)
+                && !SortDirection.DESC.equalsIgnoreCase(sortDirection)) {
             throw new BadRequestException(ErrorMessage.SORT_DIRECTION_MUST_BE_ASC_OR_DESC);
         }
     }
